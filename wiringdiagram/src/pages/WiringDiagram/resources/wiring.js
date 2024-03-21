@@ -1,5 +1,6 @@
 window.addEventListener("load", function () {
-    var svg = document.getElementById('Layer_1');
+    // var svg = document.getElementById('Layer_1');
+    var svg = this.document.querySelector('svg');
     var selected_elements = {
         "text": [],
         "line": []
@@ -11,8 +12,9 @@ window.addEventListener("load", function () {
 
     while (i < g_elements.length) {
         var g_ele = g_elements[i];
-
-        var inside_text_eles = Array.from(g_ele.querySelectorAll(':scope > g > text'));
+        
+        // Null elements: inside_text_eles
+        var inside_text_eles = Array.from(g_ele.querySelectorAll(':scope > g'));
         var text_ele = Array.from(g_ele.querySelectorAll(':scope > text'));
         var line_eles = Array.from(g_ele.querySelectorAll(':scope line'));
 
