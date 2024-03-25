@@ -21,10 +21,14 @@ text.not-active {
     fill: rgb(204, 204, 204) !important;
 }
 
-.not-active line:not(.active) {
+/* .not-active line:not(.active) {
     stroke: rgb(204, 204, 204) !important;
     stroke-width: 0.7763 !important;
+} */
 
+line.not-active {
+    stroke: rgb(204, 204, 204) !important;
+    stroke-width: 0.7763 !important;
 }
 
 text,
