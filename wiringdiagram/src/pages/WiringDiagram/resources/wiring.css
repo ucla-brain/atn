@@ -51,11 +51,11 @@ line.animate {
 
 @keyframes text-animate {
     from {
-        font-size: 21.06px;
+        font-size: 12px;
     }
 
     to {
-        font-size: 28px;
+        font-size: 13.5px;
     }
 }
 
