@@ -3,6 +3,8 @@ function log(item){
     console.log(item)
 }
 
+// Define global elements
+const special_cases = ['notes']
 let g_elements = {}
 let g_elements_groups = {}
 let g_elements_groups_key = new Set()
@@ -24,11 +26,16 @@ function identifyElements() {
     // Add required event listeners to text
     for (const text_el of text_element_groups) {
         for (const tspan_el of text_el.childNodes){
-            tspan_elements.push(tspan_el)
-            tspan_el.addEventListener('click', function() { 
-                toggleActivateClass(tspan_el);
-                animateClass(tspan_el)
-            })
+            let parent = tspan_el.parentElement.parentElement
+            if (special_cases.includes(parent.id)){
+                // Special case found
+            } else  {
+                tspan_elements.push(tspan_el)
+                tspan_el.addEventListener('click', function() { 
+                    toggleActivateClass(tspan_el);
+                    animateClass(tspan_el)
+                })
+            }
         }
     }
 
