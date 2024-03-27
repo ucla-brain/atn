@@ -5,18 +5,13 @@ function log(item){
 
 let g_elements = {}
 let g_elements_groups = {}
+let g_elements_groups_key = new Set()
 let line_elements = {}
 let line_element_groups = {}
 let path_elements = {}
 let path_element_groups = {}
 let text_element_groups = {}
 let tspan_elements = []
-
-function extractClassGroup(str){
-    let regex = /cls-\d{2}/
-    let substring = str.classList.value.match(regex)
-    return substring;
-}
 
 function identifyElements() {
     // Populate element object lists
@@ -59,15 +54,30 @@ function identifyElements() {
         })
     }
 
-    // log(path_elements)
-    // log(line_elements)
-    // log(line_element_groups)
-    // log(path_element_groups)
-    // log(g_elements_groups)
-
+    // Special Grouping for path and line tag elements
     g_elements_groups.forEach(group => {
-        // TODO: group paths and lines based on parent g component
-        
+        group.childNodes.forEach(nestedGroup => {
+            if (nestedGroup.tagName == 'g'){
+                let tempSet = new Set();
+                nestedGroup.childNodes.forEach(innerElement => {
+                    if ((innerElement.tagName == 'line') || (innerElement.tagName == 'path')) {
+                        let classValue = extractClassGroup(innerElement);
+                        if (classValue != null){
+                            tempSet.add(classValue[0])
+                            tempSet.add(innerElement.tagName)
+                        }
+                    }
+                })
+                if (tempSet.size > 3){
+                    g_elements_groups_key.add(JSON.stringify(Array.from(tempSet)))
+                }
+                else {
+                    // log('invalid pairing likely due to outlier elements: ' +  tempSet.size)
+                    // log(tempSet)
+                }
+
+            }
+        })
     })
 }
 
@@ -114,21 +124,19 @@ function activateClass(ele) {
         ele.classList.add('active');
     } else {
         let classValue = extractClassGroup(ele)
-        if (tagName == 'path') {
-            path_element_groups[classValue].forEach(element => {
-                element.classList.remove('active');
-                element.classList.add('not-active');
-            });
-        } else {
-            line_element_groups[classValue].forEach(element => {
+        let correspondingEl = correspondingElement(tagName, classValue[0])
+        let lineClass = (tagName == 'line') ? classValue[0] : correspondingEl;
+        let pathClass = (tagName == 'line') ? correspondingEl : classValue[0];
+        if(correspondingEl){
+            path_element_groups[pathClass].forEach(element => {
                 element.classList.remove('not-active');
-                element.classList.add('active')
+                element.classList.add('active');
             });
-            // path_element_groups[classValue].forEach(element => {
-            //     element.classList.remove('active');
-            //     element.classList.add('not-active');
-            // });
         }
+        line_element_groups[lineClass].forEach(element => {
+            element.classList.remove('not-active');
+            element.classList.add('active')
+        });
     }
 };
 
@@ -139,17 +147,19 @@ function deActivateClass(ele) {
         ele.classList.add('not-active');
     } else {
         let classValue = extractClassGroup(ele)
-        if (tagName == 'path'){
-            path_element_groups[classValue].forEach(element => {
-                element.classList.remove('active');
-                element.classList.add('not-active');
-            });
-        } else {
-            line_element_groups[classValue].forEach(element => {
+        let correspondingEl = correspondingElement(tagName, classValue[0])
+        let lineClass = (tagName == 'line') ? classValue[0] : correspondingEl;
+        let pathClass = (tagName == 'line') ? correspondingEl : classValue[0];
+        if (correspondingEl){
+            path_element_groups[pathClass].forEach(element => {
                 element.classList.remove('active');
                 element.classList.add('not-active');
             });
         }
+        line_element_groups[lineClass].forEach(element => {
+            element.classList.remove('active');
+            element.classList.add('not-active')
+        });
     }
 };
 
@@ -158,5 +168,26 @@ function animateClass(ele) {
         ele.classList.toggle('animate');
     }
 };
+
+function extractClassGroup(str){
+    let regex = /cls-\d{2}/
+    let substring = str.classList.value.match(regex)
+    return substring;
+}
+
+function correspondingElement(clickedElement, clickedElementClass) {
+    let key = Array.from(g_elements_groups_key, JSON.parse)
+
+    for (let groupArray of key){
+        if (groupArray.includes(clickedElementClass)){
+            if (clickedElement == 'line'){
+                return groupArray[2]
+            } else {
+                return groupArray[0]
+            }
+        }
+    }
+
+}
 
 window.addEventListener('load', identifyElements);
