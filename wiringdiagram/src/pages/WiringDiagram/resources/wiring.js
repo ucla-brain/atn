@@ -4,7 +4,51 @@ function log(item){
 }
 
 // Define global elements
-const special_cases = ['notes']
+const manualTextLineLinks = [
+    ['AMd.d', 'cls-35'],
+    ['AMd.dl','cls-33'],
+    ['AMd.c','cls-26'],
+    ['AMd.l','cls-31'],
+    ['AMv','cls-32'],
+    ['AMd.m','cls-36'],
+    ['AMd.dm','cls-19', 'cls-22'],
+    ['BLAac','cls-36'],
+    ['ORBm/vl','cls-32', 'cls-36'],
+    ['ILA','cls-32', 'cls-36'],
+    ['PL','cls-32', 'cls-36'],
+    ['ACAc','cls-35'],
+    ['ACAr','cls-22', 'cls-32', 'cls-19'],
+    ['RSPd','cls-34', 'cls-27'],
+    ['RSPv','cls-29', 'cls-34', 'cls-33'],
+    ['RSPv(6)','cls-30'],
+    ['RSPagl','cls-27'],
+    ['PTLp','cls-31', 'cls-26'],
+    ['MOs fef','cls-26'],
+    ['POST','cls-27', 'cls-28'],
+    ['PRE','cls-27', 'cls-28'],  
+    ['PAR','cls-27', 'cls-28'],
+    ['SUBd','cls-23'],
+    ['SUBv','cls-23','cls-25','cls-30','cls-36'],
+    ['ENTl','cls-26'],
+    ['CPdm','cls-25'],
+    ['ADm','cls-28'],
+    ['IAD','cls-25'],
+    ['ADl','cls-34'],
+    ['AVd','cls-27'],
+    ['AVm','cls-29'],
+    ['AVmt','cls-30'],
+    ['AVl','cls-23'],
+    ['SC','cls-25'],
+    ['LDT','cls-20', 'cls-24', 'cls-17'],
+    ['VTN','cls-28','cls-34'],
+    ['DR','cls-28','cls-34'],
+    ['DTN','cls-28','cls-34'],
+    ['MMmed','cls-25'],
+    ['MMm','cls-18', 'cls-20'],
+    ['MMl','cls-30','cls-29','cls-27','cls-23'],
+    ['LM','cls-28','cls-34']
+]
+const text_special_cases = ['notes', 'non-interactive'] //class name
 let g_elements = {}
 let g_elements_groups = {}
 let g_elements_groups_key = new Set()
@@ -22,23 +66,38 @@ function identifyElements() {
     line_elements = document.querySelectorAll('line')
     path_elements = document.querySelectorAll('path')
     text_element_groups = document.querySelectorAll('text');
-    
+
     // Add required event listeners to text
     for (const text_el of text_element_groups) {
         for (const tspan_el of text_el.childNodes){
-            let parent = tspan_el.parentElement.parentElement
-            if (special_cases.includes(parent.id)){
+            if (text_special_cases.includes(tspan_el.classList.value)){
                 // Special case found
             } else  {
                 tspan_elements.push(tspan_el)
                 tspan_el.addEventListener('click', function() { 
-                    toggleActivateClass(tspan_el);
-                    animateClass(tspan_el)
+                    let rawText = tspan_el.textContent
+                    let associatedLines = identifyLinkedLines(rawText)
+                    if (associatedLines.length > 0){
+                        associatedLines.forEach((lineClass) => {
+                            // All available classes via lineClass
+                            let conditionalOverride = (line_element_groups[lineClass][0].classList.value.includes(' active'))
+                            line_element_groups[lineClass].forEach((lineEl, index) => {
+                                toggleActivateClass(lineEl, true, conditionalOverride)
+                                if (line_element_groups[lineClass].length-1 == index){
+                                    conditionalOverride = !conditionalOverride;
+                                }
+                            })
+                        })
+                        toggleActivateClass(tspan_el);
+                        animateClass(tspan_el)
+                    } else  {
+                        toggleActivateClass(tspan_el);
+                        animateClass(tspan_el)
+                    }
                 })
             }
         }
     }
-
     // Create groups based on the tag name, add required event listeners to lines
     for (const line_el of line_elements) {
         let classGroup = extractClassGroup(line_el)
@@ -46,9 +105,12 @@ function identifyElements() {
             line_element_groups[classGroup] = []
         }
         line_element_groups[classGroup].push(line_el)
-        line_el.addEventListener('click', function(){
-            toggleActivateClass(line_el)
-        })
+        if (isSpecialLineCase(line_el.classList.value)){
+        } else {
+            line_el.addEventListener('click', function(){
+                toggleActivateClass(line_el)
+            })
+        }
     }
     for (const path_el of path_elements) {
         let classGroup = extractClassGroup(path_el)
@@ -60,7 +122,6 @@ function identifyElements() {
             toggleActivateClass(path_el)
         })
     }
-
     // Special Grouping for path and line tag elements
     g_elements_groups.forEach(group => {
         group.childNodes.forEach(nestedGroup => {
@@ -79,15 +140,36 @@ function identifyElements() {
                     g_elements_groups_key.add(JSON.stringify(Array.from(tempSet)))
                 }
                 else {
-                    // log('invalid pairing likely due to outlier elements: ' +  tempSet.size)
-                    // log(tempSet)
+                         
                 }
 
             }
         })
     })
+
 }
 
+function identifyLinkedLines (text) {
+    for (let i = 0; i < manualTextLineLinks.length; i++) {
+        const innerArray = manualTextLineLinks[i];
+        if (innerArray.includes(text)) {
+            let filteredArray = innerArray.filter(item => item !== text)
+            return filteredArray; // Return the index of the array containing the target string
+        }
+    }
+    return -1;
+}
+
+function isSpecialLineCase(string) {
+    let isSpecialCase = false;
+    text_element_groups.forEach(specialCase => {
+        if (string.includes(specialCase)){
+            isSpecialCase = true;
+            return isSpecialCase
+        }
+    })
+    return isSpecialCase;
+}
 function disableNonActives(){
     for (const index in tspan_elements){
         const element = tspan_elements[index];
@@ -103,11 +185,30 @@ function disableNonActives(){
             if (!className.includes('active')){
                 deActivateClass(element)
             }
+            if (isSpecialLineCase(className)){
+                activateClass(element)
+            }
         }
     }
 }
 
-function toggleActivateClass(ele) {
+function toggleActivateClass(ele, hasLinkedElements = false, conditionalOverride) {
+    if (hasLinkedElements){
+        let elClass = ele.classList.value
+        if (elClass.includes('not-active') && (!conditionalOverride)) {
+            // Set to active
+            activateClass(ele);
+            disableNonActives();
+        }
+        else if (elClass.includes('active') && (conditionalOverride)) {
+            // Set to not-active
+            deActivateClass(ele)
+        }
+        else {
+            disableNonActives();
+            activateClass(ele);
+        }
+    } else {
         let elClass = ele.classList.value
         if (elClass.includes('not-active')) {
             // Set to active
@@ -122,6 +223,7 @@ function toggleActivateClass(ele) {
             disableNonActives();
             activateClass(ele);
         }
+    }
 }
 
 function activateClass(ele) {
