@@ -38,11 +38,11 @@ path {
 }
 
 tspan.animate {
-    animation: text-animate 2s alternate infinite linear;
+    animation: text-animate 1.5s alternate infinite linear;
 }
 
 text.animate {
-    animation: text-animate 2s alternate infinite linear;
+    animation: text-animate 1.5s alternate infinite linear;
 }
 
 line.animate {
@@ -55,7 +55,7 @@ line.animate {
     }
 
     to {
-        font-size: 13.5px;
+        font-size: 14.5px;
     }
 }
 
@@ -92,5 +92,5 @@ img {
     width: 60%; 
     height: 60%; 
     left: -80px; 
-    margin-left: 400px;
+    margin-left: 300px;
 }
