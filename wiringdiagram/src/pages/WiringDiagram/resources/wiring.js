@@ -81,7 +81,6 @@ function identifyElements() {
                         associatedLines.forEach((lineClass) => {
                             // All available classes via lineClass
                             if (line_element_groups[lineClass]){
-                                log(line_element_groups[lineClass])
                                 let conditionalOverride = (line_element_groups[lineClass][0].classList.value.includes(' active'))
                                 line_element_groups[lineClass].forEach((lineEl, index) => {
                                     toggleActivateClass(lineEl, true, conditionalOverride)
@@ -150,7 +149,8 @@ function identifyElements() {
             }
         })
     })
-    // log(g_elements_groups_key)
+
+
 }
 
 function identifyLinkedLines (text) {
@@ -231,7 +231,6 @@ function toggleActivateClass(ele, hasLinkedElements = false, conditionalOverride
 }
 
 function activateClass(ele) {
-    log(ele)
     let tagName = ele.tagName;
     if (ele && ele.classList && tagName != 'line' && tagName != 'path') {
         ele.classList.remove('not-active');
