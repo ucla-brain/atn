@@ -80,13 +80,16 @@ function identifyElements() {
                     if (associatedLines.length > 0){
                         associatedLines.forEach((lineClass) => {
                             // All available classes via lineClass
-                            let conditionalOverride = (line_element_groups[lineClass][0].classList.value.includes(' active'))
-                            line_element_groups[lineClass].forEach((lineEl, index) => {
-                                toggleActivateClass(lineEl, true, conditionalOverride)
-                                if (line_element_groups[lineClass].length-1 == index){
-                                    conditionalOverride = !conditionalOverride;
-                                }
-                            })
+                            if (line_element_groups[lineClass]){
+                                log(line_element_groups[lineClass])
+                                let conditionalOverride = (line_element_groups[lineClass][0].classList.value.includes(' active'))
+                                line_element_groups[lineClass].forEach((lineEl, index) => {
+                                    toggleActivateClass(lineEl, true, conditionalOverride)
+                                    if (line_element_groups[lineClass].length-1 == index){
+                                        conditionalOverride = !conditionalOverride;
+                                    }
+                                })
+                            }
                         })
                         toggleActivateClass(tspan_el);
                         animateClass(tspan_el)
@@ -98,6 +101,7 @@ function identifyElements() {
             }
         }
     }
+
     // Create groups based on the tag name, add required event listeners to lines
     for (const line_el of line_elements) {
         let classGroup = extractClassGroup(line_el)
@@ -122,6 +126,7 @@ function identifyElements() {
             toggleActivateClass(path_el)
         })
     }
+
     // Special Grouping for path and line tag elements
     g_elements_groups.forEach(group => {
         group.childNodes.forEach(nestedGroup => {
@@ -140,13 +145,12 @@ function identifyElements() {
                     g_elements_groups_key.add(JSON.stringify(Array.from(tempSet)))
                 }
                 else {
-                         
                 }
 
             }
         })
     })
-
+    // log(g_elements_groups_key)
 }
 
 function identifyLinkedLines (text) {
@@ -227,6 +231,7 @@ function toggleActivateClass(ele, hasLinkedElements = false, conditionalOverride
 }
 
 function activateClass(ele) {
+    log(ele)
     let tagName = ele.tagName;
     if (ele && ele.classList && tagName != 'line' && tagName != 'path') {
         ele.classList.remove('not-active');
