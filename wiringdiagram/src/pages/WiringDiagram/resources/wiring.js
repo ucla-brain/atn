@@ -91,7 +91,7 @@ function identifyElements() {
                             }
                         })
                         toggleActivateClass(tspan_el);
-                        animateClass(tspan_el)
+                        animateClass(tspan_el);
                     } else  {
                         toggleActivateClass(tspan_el);
                         animateClass(tspan_el)
@@ -255,26 +255,49 @@ function activateClass(ele) {
 
 function deActivateClass(ele) {
     let tagName = ele.tagName;
-    if (ele && ele.classList && tagName != 'line' && tagName != 'path') {
-        ele.classList.remove('active');
-        ele.classList.add('not-active');
-    } else {
-        let classValue = extractClassGroup(ele)
-        let correspondingEl = correspondingElement(tagName, classValue[0])
-        let lineClass = (tagName == 'line') ? classValue[0] : correspondingEl;
-        let pathClass = (tagName == 'line') ? correspondingEl : classValue[0];
-        if (correspondingEl){
-            path_element_groups[pathClass].forEach(element => {
-                element.classList.remove('active');
-                element.classList.add('not-active');
-            });
+    if (tagName !== 'tspan') {
+        let classValue = extractClassGroup(ele);
+        if (classValue && !hasNonActiveTspan(classValue)) { // Only proceed if no active tspans
+            if (ele && ele.classList && tagName !== 'line' && tagName !== 'path') {
+                ele.classList.remove('active');
+                ele.classList.add('not-active');
+            } else if (classValue) {
+                let correspondingEl = correspondingElement(tagName, classValue[0]);
+                let lineClass = (tagName == 'line') ? classValue[0] : correspondingEl;
+                let pathClass = (tagName == 'line') ? correspondingEl : classValue[0];
+                if (correspondingEl) {
+                    path_element_groups[pathClass]?.forEach(element => {
+                        element.classList.remove('active');
+                        element.classList.add('not-active');
+                    });
+                }
+                line_element_groups[lineClass]?.forEach(element => {
+                    element.classList.remove('active');
+                    element.classList.add('not-active');
+                });
+            }
+        } else {
+            // console.log(hasNonActiveTspan(classValue))
         }
-        line_element_groups[lineClass].forEach(element => {
-            element.classList.remove('active');
-            element.classList.add('not-active')
-        });
     }
-};
+}
+
+function hasNonActiveTspan(classGroup) {
+    // log(classGroup)
+    for (let link of manualTextLineLinks) {
+        if (link.includes(classGroup)) {
+            // TODO:
+            let tspanText = link[0]; 
+            for (let tspan_el of tspan_elements) {
+                if (tspan_el.textContent === tspanText && tspan_el.classList.contains('not-active')) {
+                    return true;
+                }
+            }
+        }
+    }
+// No active associated tspans found
+    return false;
+}
 
 function animateClass(ele) {
     if (ele && ele.classList) {
