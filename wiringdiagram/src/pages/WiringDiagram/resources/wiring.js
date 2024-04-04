@@ -12,7 +12,7 @@ const manualTextLineLinks = [
     ['AMv','cls-32'],
     ['AMd.m','cls-36'],
     ['AMd.dm','cls-19', 'cls-22'],
-    ['BLAac','cls-36'],
+    ['BLAa','cls-36'],
     ['ORBm/vl','cls-32', 'cls-36'],
     ['ILA','cls-32', 'cls-36'],
     ['PL','cls-32', 'cls-36'],
@@ -20,10 +20,10 @@ const manualTextLineLinks = [
     ['ACAr','cls-22', 'cls-32', 'cls-19'],
     ['RSPd','cls-34', 'cls-27'],
     ['RSPv','cls-29', 'cls-34', 'cls-33'],
-    ['RSPv(6)','cls-30'],
     ['RSPagl','cls-27'],
-    ['PTLp','cls-31', 'cls-26'],
+    ['PTLp','cls-31'],
     ['MOs fef','cls-26'],
+    ['ECT/PERIc','cls-26'],
     ['POST','cls-27', 'cls-28'],
     ['PRE','cls-27', 'cls-28'],  
     ['PAR','cls-27', 'cls-28'],
@@ -37,6 +37,7 @@ const manualTextLineLinks = [
     ['AVd','cls-27'],
     ['AVm','cls-29'],
     ['AVmt','cls-30'],
+    ['RSPv (6)','cls-30'],
     ['AVl','cls-23'],
     ['SC','cls-25'],
     ['LDT','cls-20', 'cls-24', 'cls-17'],
@@ -48,7 +49,7 @@ const manualTextLineLinks = [
     ['MMl','cls-30','cls-29','cls-27','cls-23'],
     ['LM','cls-28','cls-34']
 ]
-const text_special_cases = ['notes', 'non-interactive'] //class name
+const special_case_classes = ['notes', 'non-interactive'] //class name
 let g_elements = {}
 let g_elements_groups = {}
 let g_elements_groups_key = new Set()
@@ -70,7 +71,8 @@ function identifyElements() {
     // Add required event listeners to text
     for (const text_el of text_element_groups) {
         for (const tspan_el of text_el.childNodes){
-            if (text_special_cases.includes(tspan_el.classList.value)){
+            let appendedSpecialCase = tspan_el.classList.value.substring(tspan_el.classList.value.length - 5);
+            if (special_case_classes.includes(tspan_el.classList.value) || (special_case_classes.includes(appendedSpecialCase))){
                 // Special case found
             } else  {
                 tspan_elements.push(tspan_el)
@@ -156,9 +158,12 @@ function identifyElements() {
 function identifyLinkedLines (text) {
     for (let i = 0; i < manualTextLineLinks.length; i++) {
         const innerArray = manualTextLineLinks[i];
-        if (innerArray.includes(text)) {
-            let filteredArray = innerArray.filter(item => item !== text)
-            return filteredArray; // Return the index of the array containing the target string
+        try{
+            if (innerArray.includes(text)) {
+                let filteredArray = innerArray.filter(item => item !== text)
+                return filteredArray; // Return the index of the array containing the target string
+            }
+        }catch {
         }
     }
     return -1;
@@ -166,7 +171,7 @@ function identifyLinkedLines (text) {
 
 function isSpecialLineCase(string) {
     let isSpecialCase = false;
-    text_element_groups.forEach(specialCase => {
+    special_case_classes.forEach(specialCase => {
         if (string.includes(specialCase)){
             isSpecialCase = true;
             return isSpecialCase
@@ -257,7 +262,8 @@ function deActivateClass(ele) {
     let tagName = ele.tagName;
     if (tagName !== 'tspan') {
         let classValue = extractClassGroup(ele);
-        if (classValue && !hasNonActiveTspan(classValue)) { // Only proceed if no active tspans
+        // if (classValue && hasActiveTspan(classValue)) { // Only proceed if no active tspans
+        if (classValue) { // Only proceed if no active tspans
             if (ele && ele.classList && tagName !== 'line' && tagName !== 'path') {
                 ele.classList.remove('active');
                 ele.classList.add('not-active');
@@ -277,22 +283,23 @@ function deActivateClass(ele) {
                 });
             }
         } else {
-            // console.log(hasNonActiveTspan(classValue))
+
         }
     }
 }
 
-function hasNonActiveTspan(classGroup) {
-    // log(classGroup)
-    for (let link of manualTextLineLinks) {
-        if (link.includes(classGroup)) {
-            // TODO:
-            let tspanText = link[0]; 
+function hasActiveTspan(classGroup) {
+    //check if text associated with lines group is active
+    // TODO: Idetintify special case duplicate toggles
+    for (let textLineLink of manualTextLineLinks) {
+        if (textLineLink.includes(classGroup[0])) {
+            let tspanText = textLineLink[0];
             for (let tspan_el of tspan_elements) {
-                if (tspan_el.textContent === tspanText && tspan_el.classList.contains('not-active')) {
+                if (tspan_el.textContent === tspanText && tspan_el.classList.contains('active')) {
                     return true;
                 }
             }
+        } else {
         }
     }
 // No active associated tspans found
