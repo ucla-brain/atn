@@ -80,6 +80,8 @@ function identifyElements() {
                     let rawText = tspan_el.textContent
                     let associatedLines = identifyLinkedLines(rawText)
                     if (associatedLines.length > 0){
+                        toggleActivateClass(tspan_el);
+                        animateClass(tspan_el);
                         associatedLines.forEach((lineClass) => {
                             // All available classes via lineClass
                             if (line_element_groups[lineClass]){
@@ -92,8 +94,6 @@ function identifyElements() {
                                 })
                             }
                         })
-                        toggleActivateClass(tspan_el);
-                        animateClass(tspan_el);
                     } else  {
                         toggleActivateClass(tspan_el);
                         animateClass(tspan_el)
@@ -161,7 +161,7 @@ function identifyLinkedLines (text) {
         try{
             if (innerArray.includes(text)) {
                 let filteredArray = innerArray.filter(item => item !== text)
-                return filteredArray; // Return the index of the array containing the target string
+                return filteredArray; // Return the array containing the target string
             }
         }catch {
         }
@@ -262,8 +262,7 @@ function deActivateClass(ele) {
     let tagName = ele.tagName;
     if (tagName !== 'tspan') {
         let classValue = extractClassGroup(ele);
-        // if (classValue && hasActiveTspan(classValue)) { // Only proceed if no active tspans
-        if (classValue) { // Only proceed if no active tspans
+        if (classValue && !hasActiveCorrespondingTspan(classValue, ele)) { // Only proceed if no active tspans
             if (ele && ele.classList && tagName !== 'line' && tagName !== 'path') {
                 ele.classList.remove('active');
                 ele.classList.add('not-active');
@@ -288,14 +287,14 @@ function deActivateClass(ele) {
     }
 }
 
-function hasActiveTspan(classGroup) {
+function hasActiveCorrespondingTspan(classGroup, ele) {
     //check if text associated with lines group is active
     // TODO: Idetintify special case duplicate toggles
     for (let textLineLink of manualTextLineLinks) {
         if (textLineLink.includes(classGroup[0])) {
             let tspanText = textLineLink[0];
             for (let tspan_el of tspan_elements) {
-                if (tspan_el.textContent === tspanText && tspan_el.classList.contains('active')) {
+                if (tspan_el.textContent === tspanText && tspan_el.classList.contains('animate')) {
                     return true;
                 }
             }
