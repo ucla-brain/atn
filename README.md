@@ -4,7 +4,7 @@ This is a repository dedicated to the ATN project and the wiring diagram.
 
 ## Wiring Diagram
 
-The map features pathway reconstructions of brain-wide tracer-labeled input and output connections of Anterior group of the dorsal thalamus (ATN).
+A wiring diagram of all input and output connections of Anterior group of the dorsal thalamus (ATN).
 
 
 
