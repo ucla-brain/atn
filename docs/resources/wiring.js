@@ -14,14 +14,14 @@ const manualTextLineLinks = [
     ['AMd.m','cls-36','cls-18','cls-20','cls-17'],
     ['AMd.dm','cls-19','cls-22','cls-18','cls-20','cls-17'],
 
-    ['ADm','cls-28'],
+    ['AD.m','cls-28'],
     ['IAD','cls-25'],
-    ['ADl','cls-34'],
+    ['AD.l','cls-34'],
     
-    ['AVd','cls-27','cls-24'],
-    ['AVm','cls-29','cls-24'],
-    ['AVmt','cls-30','cls-24'],
-    ['AVl','cls-23','cls-24'],
+    ['AV.d','cls-27','cls-24'],
+    ['AV.m','cls-29','cls-24'],
+    ['AV.mt','cls-30','cls-24'],
+    ['AV.l','cls-23','cls-24'],
 
     // Non ATN ROI
     // ['BLAa','cls-36'],
